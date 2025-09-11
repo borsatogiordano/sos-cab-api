@@ -1,39 +1,44 @@
 import { Prisma } from "@prisma/client";
 import { UserRepository } from "../repositories/user";
 import bcrypt from "bcryptjs";
+import { UserAlreadyExistsError } from "../errors/user/user-errors";
 
 export class UserService {
-  constructor(private userRepo: UserRepository) {}
+    constructor(private userRepo: UserRepository) { }
 
-  async createUser(input: Prisma.UserCreateInput) {
-    // regra de negócio: criptografar senha
-    if ("password" in input) {
-      input.password = await bcrypt.hash(input.password, 8);
+    async createUser(input: Prisma.UserCreateInput) {
+        const alreadyExists = await this.userRepo.getUserByEmail(input.email);
+        if (alreadyExists) {
+            throw new UserAlreadyExistsError();
+        }
+
+        if ("password" in input) {
+            input.password = await bcrypt.hash(input.password, 8);
+        }
+        const user = await this.userRepo.createUser(input);
+
+        return user;
     }
-    const user = await this.userRepo.createUser(input);
 
-    return user;
-  }
+    async getAllUsers() {
+        const users = await this.userRepo.getAllUsers();
+        return users.map(({ password, ...rest }) => rest);
+    }
 
-  async getAllUsers() {
-    const users = await this.userRepo.getAllUsers();
-    return users.map(({ password, ...rest }) => rest);
-  }
+    async getUserById(id: string) {
+        const user = await this.userRepo.getUserById(id);
+        if (!user) return null;
+        const { password, ...safeUser } = user;
+        return safeUser;
+    }
 
-  async getUserById(id: string) {
-    const user = await this.userRepo.getUserById(id);
-    if (!user) return null;
-    const { password, ...safeUser } = user;
-    return safeUser;
-  }
+    async updateUser(id: string, data: Prisma.UserUpdateInput) {
+        const user = await this.userRepo.updateUser(id, data);
+        const { password, ...safeUser } = user;
+        return safeUser;
+    }
 
-  async updateUser(id: string, data: Prisma.UserUpdateInput) {
-    const user = await this.userRepo.updateUser(id, data);
-    const { password, ...safeUser } = user;
-    return safeUser;
-  }
-
-  async deleteUser(id: string) {
-    return this.userRepo.deleteUser(id);
-  }
+    async deleteUser(id: string) {
+        return this.userRepo.deleteUser(id);
+    }
 }
