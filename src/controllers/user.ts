@@ -1,8 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Prisma } from "@prisma/client";
 import { UserService } from "../services/user";
+import { UserNotFoundError } from "../errors/separated-errors/user-errors";
 
-interface CreateUserBody {
+export interface CreateUserBody {
     email: string;
     password: string;
 }
@@ -10,14 +11,14 @@ interface CreateUserBody {
 export class UserController {
     constructor(private userService: UserService) { }
 
-
     createUser = async (request: FastifyRequest, reply: FastifyReply) => {
         const user = await this.userService.createUser(request.body as CreateUserBody);
         reply.code(201).send();
     };
 
-    getAllUsers = async (_request: FastifyRequest, reply: FastifyReply) => {
-        const users = await this.userService.getAllUsers();
+    getAllUsers = async (request: FastifyRequest, reply: FastifyReply) => {
+        const { page, perPage } = request.query as { page?: number; perPage?: number };
+        const users = await this.userService.getAllUsers(page, perPage);
         reply.send(users);
     };
 
@@ -28,16 +29,45 @@ export class UserController {
         reply.send(user);
     };
 
-    updateUser = async (request: FastifyRequest, reply: FastifyReply) => {
+    changeEmail = async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
-        const data: Prisma.UserUpdateInput = request.body as Prisma.UserUpdateInput;
-        const user = await this.userService.updateUser(id, data);
-        reply.send(user);
+        const { email } = request.body as { email: string };
+        const loggedUser = request.user;
+
+        console.log('=== DEBUG CHANGE EMAIL ===');
+        console.log('request.params:', request.params);
+        console.log('request.body:', request.body);
+        console.log('request.user:', request.user);
+        console.log('Extracted id:', id);
+
+        await this.userService.changeEmail(
+            id,
+            email,
+            loggedUser.userId,
+            loggedUser.role
+        );
+        reply.send({ message: "Email alterado com sucesso" });
     };
 
     deleteUser = async (request: FastifyRequest, reply: FastifyReply) => {
+        const loggedUser = request.user;
         const { id } = request.params as { id: string };
-        await this.userService.deleteUser(id);
+
+        await this.userService.deleteUser(
+            loggedUser.userId,
+            loggedUser.role,
+            id
+        );
         reply.code(204).send();
     };
+
+    login = async (request: FastifyRequest, reply: FastifyReply) => {
+        const { email, password } = request.body as { email: string; password: string };
+        const user = await this.userService.login({ email, password });
+        const token = await reply.jwtSign({ userId: user.id });
+        reply.send({
+            message: "Login feito com sucesso",
+            token
+        });
+    }
 }

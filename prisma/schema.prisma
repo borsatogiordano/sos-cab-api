@@ -13,10 +13,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum USER_ROLE {
+  USER
+  ADMIN
+}
+
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  role      USER_ROLE @default(USER)
 
   profile Profile?
 
@@ -30,5 +37,7 @@ model Profile {
 
   userId String @unique
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
 }

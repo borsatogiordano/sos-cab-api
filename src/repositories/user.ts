@@ -1,25 +1,65 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { CreateUserBody } from "../controllers/user";
 
 export class UserRepository {
-    async createUser(data: Prisma.UserCreateInput) {
-        return prisma.user.create({ data });
+    async createUser({ email, password }: CreateUserBody) {
+        return prisma.user.create({ data: { email, password } });
     }
 
     async getUserById(id: string) {
-        return prisma.user.findUnique({ where: { id } });
+        return prisma.user.findUnique(
+            {
+                where: { id },
+                select: {
+                    id: true, email: true, profile: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                        }
+                    }
+                }
+            });
     }
 
     async getUserByEmail(email: string) {
         return prisma.user.findUnique({ where: { email } });
     }
 
-    async getAllUsers() {
-        return prisma.user.findMany();
+    async getAllUsers(page: number = 1, perPage: number = 10) {
+        const skip = (page - 1) * perPage;
+
+        const [users, total] = await Promise.all([
+            prisma.user.findMany({
+                skip,
+                take: perPage,
+                select: {
+                    id: true,
+                    email: true,
+                    profile: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                        }
+                    },
+                }
+            }),
+            prisma.user.count()
+        ]);
+
+        return {
+            users,
+            pagination: {
+                page,
+                perPage,
+                total,
+                totalPages: Math.ceil(total / perPage),
+            }
+        };
     }
 
-    async updateUser(id: string, data: Prisma.UserUpdateInput) {
-        return prisma.user.update({ where: { id }, data });
+    async changeEmail(id: string, email: string) {
+        return prisma.user.update({ where: { id }, data: { email } });
     }
 
     async deleteUser(id: string) {
