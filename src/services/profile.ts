@@ -27,7 +27,6 @@ export class ProfileService {
 
     updateProfile = async (targetUserId: string, loggedUserId: string, userRole: string, data: UpdateProfile) => {
 
-        console.log({ targetUserId, loggedUserId, userRole, data });
         const targetUser = await this.userRepository.getUserById(targetUserId);
 
         if (!targetUser) {

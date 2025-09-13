@@ -18,6 +18,12 @@ enum USER_ROLE {
   ADMIN
 }
 
+enum PAYMENT_METHOD {
+  CASH
+  CARD
+  PIX
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -26,6 +32,7 @@ model User {
   role      USER_ROLE @default(USER)
 
   profile Profile?
+  rides   Ride[]
 
   @@map("users")
 }
@@ -38,4 +45,18 @@ model Profile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
+}
+
+model Ride {
+  id            String         @id @default(cuid())
+  userId        String
+  startAddress  String
+  endAddress    String
+  distance      Decimal        @db.Decimal(8, 2)
+  price         Decimal        @db.Decimal(10, 2)
+  paymentMethod PAYMENT_METHOD
+  observations  String?
+  rideDate      DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

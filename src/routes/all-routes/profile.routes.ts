@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { profileSchemas } from "../../schemas/profile-schemas";
 import { makeProfileFactory } from "../../factories/make-profile-factory";
-import { verify } from "crypto";
 import { verifyJWT } from "../../middlewares/verify-jwt";
 
 export async function profileRoutes(app: FastifyInstance) {
