@@ -2,8 +2,8 @@ import { Prisma } from "@prisma/client";
 import { UserRepository } from "../repositories/user";
 import bcrypt from "bcryptjs";
 import { InvalidUserCredentialsError, UserAlreadyExistsError, UserNotFoundError } from "../errors/separated-errors/user-errors";
-import { CreateUserBody } from "../controllers/user";
 import { ForbiddenError } from "../errors/separated-errors/authentication-errors";
+import { CreateUserBody } from "../schemas/user-schemas";
 
 export class UserService {
     constructor(private userRepo: UserRepository) { }
@@ -34,7 +34,6 @@ export class UserService {
     }
 
     async changeEmail(id: string, email: string, loggedUserId: string, loggedUserRole: string) {
-
 
         const userToUpdate = await this.userRepo.getUserById(id);
         if (!userToUpdate) {

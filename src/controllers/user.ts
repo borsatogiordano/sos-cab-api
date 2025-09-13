@@ -1,18 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Prisma } from "@prisma/client";
 import { UserService } from "../services/user";
-import { UserNotFoundError } from "../errors/separated-errors/user-errors";
-
-export interface CreateUserBody {
-    email: string;
-    password: string;
-}
+import { ChangeEmailBody, ChangeEmailParams, CreateUserBody, LoginBody } from "../schemas/user-schemas";
 
 export class UserController {
     constructor(private userService: UserService) { }
 
     createUser = async (request: FastifyRequest, reply: FastifyReply) => {
-        const user = await this.userService.createUser(request.body as CreateUserBody);
+        const body = request.body as CreateUserBody;
+        const user = await this.userService.createUser(body);
         reply.code(201).send();
     };
 
@@ -30,15 +25,9 @@ export class UserController {
     };
 
     changeEmail = async (request: FastifyRequest, reply: FastifyReply) => {
-        const { id } = request.params as { id: string };
-        const { email } = request.body as { email: string };
         const loggedUser = request.user;
-
-        console.log('=== DEBUG CHANGE EMAIL ===');
-        console.log('request.params:', request.params);
-        console.log('request.body:', request.body);
-        console.log('request.user:', request.user);
-        console.log('Extracted id:', id);
+        const { id } = request.params as ChangeEmailParams;
+        const { email } = request.body as ChangeEmailBody;
 
         await this.userService.changeEmail(
             id,
@@ -62,7 +51,7 @@ export class UserController {
     };
 
     login = async (request: FastifyRequest, reply: FastifyReply) => {
-        const { email, password } = request.body as { email: string; password: string };
+        const { email, password } = request.body as LoginBody;
         const user = await this.userService.login({ email, password });
         const token = await reply.jwtSign({ userId: user.id });
         reply.send({

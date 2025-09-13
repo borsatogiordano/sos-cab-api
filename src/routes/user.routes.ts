@@ -3,7 +3,7 @@ import { UserRepository } from "../repositories/user";
 import { UserService } from "../services/user";
 import { UserController } from "../controllers/user";
 import { verifyJWT } from "../middlewares/verify-jwt";
-import { userSchemas } from "../schemas/user-schemas";
+import { ChangeEmailBody, userSchemas } from "../schemas/user-schemas";
 
 export async function userRoutes(app: FastifyInstance) {
     const repo = new UserRepository();

@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 
 export const userSchemas = {
     createUser: {
@@ -16,12 +16,8 @@ export const userSchemas = {
     },
 
     changeEmail: {
-        params: z.object({
-            id: z.string("O ID do usuário é obrigatório")
-        }),
-        body: z.object({
-            email: z.email("Email inválido")
-        })
+        body: z.object({ email: z.email("Email inválido") }),
+        params: z.object({ id: z.string() })
     },
 
     getUserById: {
@@ -32,6 +28,7 @@ export const userSchemas = {
 };
 
 export type CreateUserBody = z.infer<typeof userSchemas.createUser.body>;
-export type ChangeEmailParams = z.infer<typeof userSchemas.changeEmail.params>;
+export type LoginBody = z.infer<typeof userSchemas.createUser.body>;
 export type ChangeEmailBody = z.infer<typeof userSchemas.changeEmail.body>;
+export type ChangeEmailParams = z.infer<typeof userSchemas.changeEmail.params>;
 export type GetAllUsersQuery = z.infer<typeof userSchemas.getAllUsers.querystring>;

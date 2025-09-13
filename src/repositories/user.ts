@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { CreateUserBody } from "../controllers/user";
+import { CreateUserBody } from "../schemas/user-schemas";
 
 export class UserRepository {
     async createUser({ email, password }: CreateUserBody) {
