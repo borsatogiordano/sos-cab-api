@@ -18,7 +18,18 @@ export const rideSchemas = {
             paymentMethod: PaymentMethodEnum,
             observations: z.string().optional(),
         })
-    }
+    },
+    findRidesByUserId: {
+        querystring: z.object({
+            page: z.coerce.number().optional(),
+            perPage: z.coerce.number().optional(),
+        }),
+        params: z.object({
+            userId: z.string()
+        })
+    },
 };
 
-export type CreateRide = z.infer<typeof rideSchemas.createRide.body>; 
+export type CreateRide = z.infer<typeof rideSchemas.createRide.body>;
+export type FindRidesByUserIdParams = z.infer<typeof rideSchemas.findRidesByUserId.params>;
+export type FindRidesByUserIdQuery = z.infer<typeof rideSchemas.findRidesByUserId.querystring>;

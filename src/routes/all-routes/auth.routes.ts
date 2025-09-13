@@ -13,5 +13,4 @@ export async function authRoutes(app: FastifyInstance) {
     app.post("/login", {
         schema: userSchemas.createUser
     }, controller.login);
-
 }
