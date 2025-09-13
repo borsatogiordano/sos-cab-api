@@ -53,7 +53,7 @@ export class UserController {
     login = async (request: FastifyRequest, reply: FastifyReply) => {
         const { email, password } = request.body as LoginBody;
         const user = await this.userService.login({ email, password });
-        const token = await reply.jwtSign({ userId: user.id });
+        const token = await reply.jwtSign({ userId: user.id, role: user.role });
         reply.send({
             message: "Login feito com sucesso",
             token
