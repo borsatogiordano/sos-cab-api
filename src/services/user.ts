@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { UserRepository } from "../repositories/user";
 import bcrypt from "bcryptjs";
 import { InvalidUserCredentialsError, UserAlreadyExistsError, UserNotFoundError } from "../errors/separated-errors/user-errors";
