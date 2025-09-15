@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { RidesService } from "../services/rides";
-import { CreateRide, FindRidesByUserIdParams, FindRidesByUserIdQuery } from "../schemas/ride-schema";
+import { CreateRide, FindRideByDateRangeQuery, FindRidesByUserIdParams, FindRidesByUserIdQuery } from "../schemas/ride-schema";
 
 export class RideController {
     constructor(private rideService: RidesService) { }
@@ -24,5 +24,30 @@ export class RideController {
 
         const rides = await this.rideService.findRidesByUserId({ userId }, { page, perPage });
         reply.send(rides);
+    }
+
+    findRidesByDateRange = async (request: FastifyRequest, reply: FastifyReply) => {
+        const { startDate, endDate } = request.query as FindRideByDateRangeQuery;
+        const { userId } = request.user;
+
+        const rides = await this.rideService.findRidesByDateRange(userId, new Date(startDate), new Date(endDate));
+        reply.send(rides);
+    }
+
+    updateRide = async (request: FastifyRequest, reply: FastifyReply) => {
+        const { rideId } = request.params as { rideId: string };
+        const body = request.body as CreateRide;
+        const user = request.user;
+
+        await this.rideService.updateRide(rideId, user, body);
+        reply.code(200).send();
+    }
+
+    deleteRide = async (request: FastifyRequest, reply: FastifyReply) => {
+        const user = request.user;
+        const { rideId } = request.params as { rideId: string };
+
+        await this.rideService.deleteRide(rideId, user);
+        reply.code(204).send();
     }
 }

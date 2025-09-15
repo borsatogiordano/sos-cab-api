@@ -26,4 +26,23 @@ export async function rideRoutes(app: FastifyInstance) {
         onRequest: verifyJWT,
         schema: rideSchemas.findRidesByUserId.querystring
     }, controller.findMyRides);
+
+    app.get("/rides/me/date-range", {
+        onRequest: verifyJWT,
+        schema: rideSchemas.findRideByDateRange.querystring
+    }, controller.findRidesByDateRange);
+
+    app.put("/rides/:rideId", {
+        onRequest: verifyJWT,
+        schema: rideSchemas.createRide.body
+    }, controller.updateRide)
+
+    app.delete("/rides/:rideId", {
+        onRequest: verifyJWT,
+        schema: {
+            params: z.object({
+                rideId: z.string()
+            })
+        }
+    }, controller.deleteRide);
 }

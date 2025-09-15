@@ -28,8 +28,26 @@ export const rideSchemas = {
             userId: z.string()
         })
     },
-};
+    findRideByDateRange: {
+        querystring: z.object({
+            startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
+                message: "Data de início inválida",
+            }),
+            endDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
+                message: "Data de término inválida",
+            })
+        }).refine((data) => {
+            const start = new Date(data.startDate);
+            const end = new Date(data.endDate);
+            return end >= start;
+        }, {
+            message: "A data de término deve ser posterior ou igual à data de início",
+            path: ["endDate"]
+        })
+    }
+}
 
 export type CreateRide = z.infer<typeof rideSchemas.createRide.body>;
 export type FindRidesByUserIdParams = z.infer<typeof rideSchemas.findRidesByUserId.params>;
 export type FindRidesByUserIdQuery = z.infer<typeof rideSchemas.findRidesByUserId.querystring>;
+export type FindRideByDateRangeQuery = z.infer<typeof rideSchemas.findRideByDateRange.querystring>;
