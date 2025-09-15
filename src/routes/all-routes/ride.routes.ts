@@ -8,7 +8,7 @@ export async function rideRoutes(app: FastifyInstance) {
 
     const controller = makeRidesFactory();
 
-    app.post("/create-ride", {
+    app.post("/rides", {
         onRequest: verifyJWT,
         schema: rideSchemas.createRide
     }, controller.createRide);
@@ -22,7 +22,7 @@ export async function rideRoutes(app: FastifyInstance) {
         }
     }, controller.findRideById);
 
-    app.get("/my-rides", {
+    app.get("/rides/me", {
         onRequest: verifyJWT,
         schema: rideSchemas.findRidesByUserId.querystring
     }, controller.findMyRides);

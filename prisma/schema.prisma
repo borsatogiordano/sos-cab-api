@@ -24,6 +24,16 @@ enum PAYMENT_METHOD {
   PIX
 }
 
+enum EXPENSE_TYPE {
+  FUEL
+  MAINTENANCE
+  INSURANCE
+  TAXES
+  TOLLS
+  PARKING
+  OTHER
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -31,8 +41,9 @@ model User {
   createdAt DateTime  @default(now())
   role      USER_ROLE @default(USER)
 
-  profile Profile?
-  rides   Ride[]
+  profile  Profile?
+  rides    Ride[]
+  expenses Expense[]
 
   @@map("users")
 }
@@ -59,4 +70,18 @@ model Ride {
   rideDate      DateTime       @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("rides")
+}
+
+model Expense {
+  id     String       @id @default(cuid())
+  userId String
+  amount Decimal      @db.Decimal(10, 2)
+  type   EXPENSE_TYPE
+  date   DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
 }
