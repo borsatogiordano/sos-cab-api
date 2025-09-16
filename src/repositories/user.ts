@@ -11,7 +11,7 @@ export class UserRepository {
             {
                 where: { id },
                 select: {
-                    id: true, email: true, profile: {
+                    id: true, email: true, role: true, profile: {
                         select: {
                             firstName: true,
                             lastName: true,

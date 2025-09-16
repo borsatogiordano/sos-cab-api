@@ -33,8 +33,8 @@ export class StatsService {
         ]);
 
         const totalEarnings = Number(totalEarningsAgg._sum.price) || 0;
-        const totalExpenses = Number(totalExpensesAgg._sum.amount) || 0;
-        const netProfit = totalEarnings - totalExpenses;
+        const totalExpenses = Math.abs(Number(totalExpensesAgg._sum.amount)) || 0;  // Converte para positivo
+        const netProfit = totalEarnings - totalExpenses;  // Subtrai o valor absoluto
 
         const periodDuration = dayjs(endDateDay).diff(dayjs(startDateDay), 'millisecond');
         const prevEndDate = dayjs(startDateDay).subtract(1, 'millisecond').toDate();
@@ -47,7 +47,7 @@ export class StatsService {
         ]);
 
         const prevEarnings = Number(prevEarningsAgg._sum.price || 0);
-        const prevExpenses = Number(prevExpensesAgg._sum.amount || 0);
+        const prevExpenses = Math.abs(Number(prevExpensesAgg._sum.amount || 0));
         const prevNetProfit = prevEarnings - prevExpenses;
 
         const calculateStat = (current: number, previous: number): StatItem => {

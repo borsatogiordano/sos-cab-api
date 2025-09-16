@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { UserService } from "../services/user";
 import { ChangeEmailBody, ChangeEmailParams, CreateUserBody, LoginBody } from "../schemas/user-schemas";
+import { verifyJWT } from "../middlewares/verify-jwt";
+import { UserNotFoundError } from "../errors/separated-errors/user-errors";
 
 export class UserController {
     constructor(private userService: UserService) { }
@@ -54,9 +56,36 @@ export class UserController {
         const { email, password } = request.body as LoginBody;
         const user = await this.userService.login({ email, password });
         const token = await reply.jwtSign({ userId: user.id, role: user.role });
+        const refreshToken = await reply.jwtSign({ userId: user.id }, { expiresIn: '7d' });
         reply.send({
             message: "Login feito com sucesso",
-            token
+            token,
+            refreshToken
         });
+    }
+
+    refreshToken = async (request: FastifyRequest, reply: FastifyReply) => {
+
+        try {
+            const { refreshToken } = request.body as { refreshToken: string };
+
+            const decoded = await request.server.jwt.verify(refreshToken);
+            const { userId } = decoded as { userId: string };
+
+            const user = await this.userService.getUserById(userId);
+            if (!user) {
+                throw new UserNotFoundError();
+            }
+
+            const newToken = await reply.jwtSign({ userId: user.id, role: user.role });
+
+            reply.send({
+                message: "Token renovado com sucesso",
+                token: newToken
+            });
+        }
+        catch (error) {
+            reply.status(401).send({ message: "Refresh token inválido ou expirado" });
+        }
     }
 }

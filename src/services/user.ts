@@ -78,4 +78,8 @@ export class UserService {
 
         return user;
     }
+
+    async refreshToken(jwtDecoded: string) {
+        return jwtDecoded;
+    }
 }
