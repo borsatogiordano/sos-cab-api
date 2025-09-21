@@ -4,6 +4,7 @@ import { globalErrorHandler } from "../errors/errorHandler";
 import { env } from "process";
 import fastifyJwt from "@fastify/jwt";
 import { routes } from "../routes";
+import fastifyCors from "@fastify/cors";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -18,11 +19,18 @@ app.register(fastifyJwt, {
     }
 });
 
-app.get("/health-check", async (request, reply) => {
+app.register(fastifyCors, {
+    origin: true,
+});
+
+app.get("/api/health-check", async (request, reply) => {
     return { status: "OK" };
 });
 
 app.register(routes);
-app.listen({ port: 3000 }, (err, address) => {
-    console.log(`Server listening at ${address}`);
+
+app.listen({ port: 3333 }, (err, port) => {
+    console.log(`Server listening at ${port}`);
 });
+
+let animal: string[] = ['cat', 'dog', 'elephant'];

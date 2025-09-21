@@ -55,7 +55,7 @@ export class UserController {
     login = async (request: FastifyRequest, reply: FastifyReply) => {
         const { email, password } = request.body as LoginBody;
         const user = await this.userService.login({ email, password });
-        const token = await reply.jwtSign({ userId: user.id, role: user.role });
+        const token = await reply.jwtSign({ userId: user.id, role: user.role }, { expiresIn: '1h' });
         const refreshToken = await reply.jwtSign({ userId: user.id }, { expiresIn: '7d' });
         reply.send({
             message: "Login feito com sucesso",
@@ -77,11 +77,13 @@ export class UserController {
                 throw new UserNotFoundError();
             }
 
-            const newToken = await reply.jwtSign({ userId: user.id, role: user.role });
+            const newToken = await reply.jwtSign({ userId: user.id, role: user.role }, { expiresIn: '1h' });
+            const newRefreshToken = await reply.jwtSign({ userId: user.id }, { expiresIn: '7d' });
 
             reply.send({
                 message: "Token renovado com sucesso",
-                token: newToken
+                token: newToken,
+                refreshToken: newRefreshToken
             });
         }
         catch (error) {
