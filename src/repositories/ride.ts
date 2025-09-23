@@ -21,6 +21,7 @@ export class RideRepository {
         const [data, total] = await Promise.all([
             prisma.ride.findMany({
                 where: { userId },
+                orderBy: { rideDate: 'desc' },
                 skip,
                 take: perPage
             }),
